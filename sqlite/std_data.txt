@@ -1,0 +1,6 @@
+rno,name,class
+1,Amit,SY
+2,Bhavya,SY
+3,Chetan,SY
+4,Dhruv,SY
+5,Ekta,SY
