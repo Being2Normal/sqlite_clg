@@ -1,0 +1,266 @@
+assin:1
+
+==================
+Q=1              |
+==================
+
+➔Create database ‘mydb1.db’ in SQLite.  
+➔In this database create one table ‘T1’ with different types of columns, NULL type column and 
+without type of column.   
+➔Insert different types of data in every column (manifest type). 
+➔Display table data and type of data (affinity type) in column mode or markdown mode. \
+
+sqlite3
+.open mydb1.db
+PRAGMA foreign_keys = ON;
+.header on
+.mode box
+
+
+CREATE TABLE T1 (
+    c_int INTEGER,
+    c_num NUMBER,
+    c_text TEXT,
+    c_varcha VARCHAR(50),
+    c_null NULL,
+    c_noth    
+);
+
+INSERT INTO T1 VALUES (1, 3.14, 'Apple', 'Fruit', NULL, '');
+INSERT INTO T1 VALUES (2, 42, 'Banana', 'Fruit', NULL, NULL);
+INSERT INTO T1 VALUES (3, '123abc', 'Car', 'Vehicle', NULL, NULL);
+INSERT INTO T1 VALUES (4, 99.99, 'Dog', 'Animal', NULL, '');
+INSERT INTO T1 VALUES (5, NULL, 'Elephant', 'Mammal', NULL, NULL);
+INSERT INTO T1 VALUES (6, 0, 'Fish', 'Aquatic', NULL, '');
+INSERT INTO T1 VALUES (7, 7.89, 'Giraffe', 'Animal', NULL, NULL);
+INSERT INTO T1 VALUES (8, 'NaN', 'House', 'Building', NULL, '');
+INSERT INTO T1 VALUES (9, 999999, 'Ice', 'Solid', NULL, NULL);
+INSERT INTO T1 VALUES (10, -123.456, 'Juice', 'Drink', NULL, '');
+
+SELECT * FROM T1;
+
+==================
+Q=2              |
+==================
+
+Using begin…Commit and begin…rollback do following transactions: 
+1) transfer 1000 rs from one account to another.  
+2) Temporary increase balance 10% just to  check result of balance
+
+
+CREATE TABLE acc (
+    acc_no INTEGER PRIMARY KEY,
+    name TEXT,
+    balance REAL
+);
+
+
+INSERT INTO acc VALUES (101, 'abdul', 5000);
+INSERT INTO acc VALUES (102, 'babita', 3000);
+
+SELECT * FROM acc;
+
+--------
+SUB Q=1|
+--------
+
+BEGIN TRANSACTION;
+
+UPDATE acc SET balance = balance - 1000 WHERE acc_no = 101;
+UPDATE acc SET balance = balance + 1000 WHERE acc_no = 102;
+
+COMMIT;
+
+
+SELECT * FROM acc;
+
+
+--------
+SUB Q=2|
+--------
+
+BEGIN TRANSACTION;
+
+UPDATE acc SET balance = balance * 1.10;
+
+SELECT * FROM acc;
+
+ROLLBACK;
+
+
+SELECT * FROM acc;
+
+
+==================
+Q=3              |
+==================
+
+Give examples (Write query and output) for following Filtering elements : 
+Distinct, where, between, in, like, union, intersect, except, limit, IS NULL, IS NOT NULL, 
+Group by, order by, conditional logic (CASE) 
+
+CREATE TABLE dep (
+    d_id INTEGER PRIMARY KEY,
+    name TEXT
+);
+
+INSERT INTO dep VALUES (2, 'IT');
+INSERT INTO dep VALUES (3, 'Finance');
+INSERT INTO dep VALUES (1, 'HR');
+
+
+CREATE TABLE emp (
+    e_id INTEGER PRIMARY KEY,
+    e_name TEXT,
+    e_sal REAL,
+    d_id INTEGER,
+    FOREIGN KEY (d_id) REFERENCES dep(d_id)
+);
+
+INSERT INTO emp VALUES (101, 'Alice', 25000, 1);
+INSERT INTO emp VALUES (102, 'Bob', 30000, 2);
+INSERT INTO emp VALUES (103, 'Charlie', 22000, 1);
+INSERT INTO emp VALUES (104, 'David', 27000, 2);
+INSERT INTO emp VALUES (105, 'Eva', 31000, 3);
+INSERT INTO emp VALUES (106, 'Frank', 15000, NULL);
+INSERT INTO emp VALUES (107, 'Grace', 18000, 1);
+INSERT INTO emp VALUES (108, 'Heidi', 25000, 3);
+INSERT INTO emp VALUES (109, 'Ivan', 28000, 2);
+INSERT INTO emp VALUES (110, 'Judy', NULL, 3);
+
+
+------
+query|
+------
+
+SELECT DISTINCT e_sal FROM emp; --Distinct
+SELECT * FROM emp WHERE e_sal > 25000; --where
+SELECT * FROM emp WHERE e_sal BETWEEN 20000 AND 28000; --between
+SELECT * FROM emp WHERE d_id IN (1, 3); --in
+SELECT * FROM emp WHERE e_name LIKE 'A%';--like
+SELECT e_name AS name FROM emp;--as
+
+UNION
+SELECT name FROM dep;--union
+
+SELECT e_name FROM emp
+
+INTERSECT
+SELECT name FROM dep;--intersect
+
+SELECT e_name FROM emp
+EXCEPT
+SELECT name FROM dep;--except
+
+SELECT * FROM emp LIMIT 5;--limit
+
+SELECT * FROM emp WHERE e_sal IS NULL;--is NULL
+
+SELECT * FROM emp WHERE e_sal IS NOT NULL;-not NULL
+
+SELECT d_id, AVG(e_sal) AS avg_salary --Group by
+FROM emp
+WHERE e_sal IS NOT NULL
+GROUP BY d_id;
+
+SELECT * FROM emp ORDER BY e_sal DESC;--order
+
+SELECT e_name, e_sal,                                 --CASE
+  CASE
+    WHEN e_sal >= 30000 THEN 'High Tax'
+    WHEN e_sal BETWEEN 20000 AND 29999 THEN 'Medium Tax'
+    WHEN e_sal < 20000 THEN 'Low Tax'
+    ELSE 'No Salary Info'
+  END AS tax_slab
+FROM emp;
+
+==================
+Q=4              |
+==================
+Create two tables and insert some data to perform following joins : 
+Inner join, Natural join, Left join, Right join, Full outer join, cross join, self join 
+
+
+CREATE TABLE clg (
+    clg_id INTEGER PRIMARY KEY,
+    clg_name TEXT,
+    city TEXT
+);
+
+INSERT INTO clg VALUES (1, 'Nirma University', 'Ahmedabad');
+INSERT INTO clg VALUES (2, 'VNSGU', 'Surat');
+INSERT INTO clg VALUES (3, 'MSU', 'Baroda');
+INSERT INTO clg VALUES (4, 'DAIICT', 'Gandhinagar');
+INSERT INTO clg VALUES (5, 'PDPU', 'Gandhinagar');
+
+CREATE TABLE std (
+    std_id INTEGER PRIMARY KEY,
+    std_name TEXT,
+    age INTEGER,
+    clg_id INTEGER,
+    FOREIGN KEY (clg_id) REFERENCES clg(clg_id)
+);
+
+INSERT INTO std VALUES (101, 'Alice', 19, 1);
+INSERT INTO std VALUES (102, 'Bob', 20, 1);
+INSERT INTO std VALUES (103, 'Charlie', 21, 2);
+INSERT INTO std VALUES (104, 'David', 20, 2);
+INSERT INTO std VALUES (105, 'Eva', 19, 3);
+INSERT INTO std VALUES (106, 'Frank', 22, 3);
+INSERT INTO std VALUES (107, 'Grace', 20, 4);
+INSERT INTO std VALUES (108, 'Heidi', 18, 4);
+INSERT INTO std VALUES (109, 'Ivan', 22, 5);
+INSERT INTO std VALUES (110, 'Judy', 19, 5);
+INSERT INTO std VALUES (111, 'Kenny', 20, NULL);
+INSERT INTO std VALUES (112, 'Laura', 21, NULL);
+INSERT INTO std VALUES (113, 'Mike', 18, 3);
+INSERT INTO std VALUES (114, 'Nina', 20, 1);
+INSERT INTO std VALUES (115, 'Oscar', 21, NULL);
+
+===========
+Inner join|
+===========
+
+SELECT std.std_name, clg.clg_name
+FROM std
+INNER JOIN clg ON std.clg_id = clg.clg_id;
+
+==========
+Left Join|
+==========
+ 
+SELECT std.std_name, clg.clg_name
+FROM std
+LEFT JOIN clg ON std.clg_id = clg.clg_id;
+
+===========
+Right Join| 
+===========
+
+SELECT clg.clg_name, std.std_name
+FROM clg
+LEFT JOIN std ON std.clg_id = clg.clg_id;
+
+===========
+Cross Join| 
+===========
+
+SELECT std.std_name, clg.clg_name
+FROM std
+CROSS JOIN clg;
+
+==========
+Self Join| 
+==========
+
+SELECT A.std_name AS Student1, B.std_name AS Student2, A.age
+FROM std A
+JOIN std B ON A.age = B.age AND A.std_id < B.std_id;
+
+
+
+
+
+
+
+
