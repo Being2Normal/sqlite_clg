@@ -69,21 +69,21 @@ Q=2              |
 create trigger for EMP(eno, name, salary) table which will not allow to update salary in march 
 month. 
 
-CREATE TABLE EMP (
+CREATE TABLE EMP1 (
     eno INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
     salary REAL
 );
 
-INSERT INTO EMP VALUES (1, 'Amit', 30000);
-INSERT INTO EMP VALUES (2, 'Bhavya', 35000);
-INSERT INTO EMP VALUES (3, 'Chetan', 40000);
+INSERT INTO EMP1 VALUES (1, 'Amit', 30000);
+INSERT INTO EMP1 VALUES (2, 'Bhavya', 35000);
+INSERT INTO EMP1 VALUES (3, 'Chetan', 40000);
 
 DROP TRIGGER IF EXISTS t_block_sal;
 
 CREATE TRIGGER t_block_sal
 BEFORE UPDATE 
-ON EMP
+ON EMP1
 BEGIN
 SELECT 
 CASE
@@ -99,7 +99,7 @@ Q=3              |
 create triggers which will maintain log table ELOG(eno, operation, date_and_time) for insert, 
 update and delete operations perform on EMP(eno, name, salary) table. 
 
-CREATE TABLE EMP (
+CREATE TABLE emp (
     eno INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
     salary REAL
@@ -111,11 +111,11 @@ CREATE TABLE ELOG (
     date_and_time TEXT
 );
 
-INSERT INTO EMP VALUES (1, 'Amit', 30000);
-INSERT INTO EMP VALUES (2, 'Bhavya', 35000);
-INSERT INTO EMP VALUES (3, 'Chetan', 40000);
-INSERT INTO EMP VALUES (4, 'Dhruv', 32000);
-INSERT INTO EMP VALUES (5, 'Ekta', 45000);
+INSERT INTO emp VALUES (1, 'Amit', 30000);
+INSERT INTO emp VALUES (2, 'Bhavya', 35000);
+INSERT INTO emp VALUES (3, 'Chetan', 40000);
+INSERT INTO emp VALUES (4, 'Dhruv', 32000);
+INSERT INTO emp VALUES (5, 'Ekta', 45000);
 
 DROP TRIGGER IF EXISTS log_insert;
 DROP TRIGGER IF EXISTS log_update;
@@ -124,7 +124,7 @@ DROP TRIGGER IF EXISTS log_delete;
 
 CREATE TRIGGER log_insert
 AFTER INSERT 
-ON EMP
+ON emp
 BEGIN
     INSERT INTO ELOG (eno, operation, date_and_time)
     VALUES (NEW.eno, 'INSERT', datetime('now'));
@@ -133,7 +133,7 @@ END;
 
 CREATE TRIGGER log_update
 AFTER UPDATE 
-ON EMP
+ON emp
 BEGIN
     INSERT INTO ELOG (eno, operation, date_and_time)
     VALUES (NEW.eno, 'UPDATE', datetime('now'));
@@ -141,7 +141,7 @@ END;
 
 CREATE TRIGGER log_delete
 AFTER DELETE 
-ON EMP
+ON emp
 BEGIN
     INSERT INTO ELOG (eno, operation, date_and_time)
     VALUES (OLD.eno, 'DELETE', datetime('now'));
@@ -149,9 +149,9 @@ END;
 
 --now for testing
 
-UPDATE EMP SET salary = 36000 WHERE eno = 2;
-DELETE FROM EMP WHERE eno = 3;
-INSERT INTO EMP VALUES (6, 'Farhan', 39000); 
+UPDATE emp SET salary = 36000 WHERE eno = 2;
+DELETE FROM emp WHERE eno = 3;
+INSERT INTO emp VALUES (6, 'Farhan', 39000); 
 
 SELECT * FROM ELOG;
 
@@ -161,3 +161,104 @@ Q=4              |
 
 create trigger for ACCOUNT(ano, balance) table to give error message if withdraw amount is 
 more than account balance.
+
+CREATE TABLE acc (
+    ano INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    balance REAL NOT NULL CHECK(balance >= 0)
+);
+
+INSERT INTO ACC VALUES (101, 'Amit',   5000);
+INSERT INTO ACC VALUES (102, 'Bhavya', 7500);
+INSERT INTO ACC VALUES (103, 'Chetan', 10000);
+INSERT INTO ACC VALUES (104, 'Dhruv',  1500);
+INSERT INTO ACC VALUES (105, 'Ekta',   6200);
+INSERT INTO ACC VALUES (106, 'Farhan', 8800);
+INSERT INTO ACC VALUES (107, 'Gita',   3000);
+INSERT INTO ACC VALUES (108, 'Harsh',  4000);
+INSERT INTO ACC VALUES (109, 'Isha',   2000);
+INSERT INTO ACC VALUES (110, 'Jatin',  9000);
+
+
+
+CREATE TRIGGER not_over
+BEFORE UPDATE OF balance ON ACCOUNT
+FOR EACH ROW
+WHEN NEW.balance < 0
+BEGIN
+    SELECT RAISE(ABORT, 'Withdrawal failed: Insufficient balance.');
+END;
+
+--testing
+
+UPDATE ACCOUNT SET balance = balance - 2000 WHERE ano = 104;
+
+SELECT * FROM ACCOUNT;
+
+==================
+Q-5              |
+==================
+
+Dump STUDENT table data into one text file
+
+.mode csv
+.output std_data.txt
+SELECT * FROM std;
+.output stdout
+
+==================
+Q-6              |
+==================
+
+.output std_line.txt
+.schema std
+SELECT * FROM std;
+.output stdout
+
+==================
+Q-7              |
+==================
+
+mydb2.db .dump > backup_of_mydb2.sql
+
+==================
+Q-8              |
+==================
+
+.headers on
+.mode csv
+.output emp_data.csv
+SELECT * FROM emp;
+.output stdout
+
+==================
+Q-9              |
+==================
+
+
+CREATE TABLE IF NOT EXISTS STUDENT (
+    rno INTEGER PRIMARY KEY,
+    s1 INTEGER,
+    s2 INTEGER,
+    s3 INTEGER
+);
+insert into STUDENT VALUES(1,78,85,90),(2,67,74,88),(3,92,80,79),(4,55,60,65),(5,88,90,93);
+
+--frist we convert 
+.mode csv
+.output std_data_csv_.csv
+SELECT * FROM STUDENT;
+.output stdout
+
+--THEM DOPE IT THE TABLE
+
+DROP TABLE STUDENT;
+
+--them we imoport 1 more time 
+.mode csv
+.separator ,
+.import std_data_csv_.csv STUDENT
+
+
+
+
