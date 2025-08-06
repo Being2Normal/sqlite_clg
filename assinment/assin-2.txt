@@ -1,0 +1,163 @@
+assin:2
+
+==================
+Q=1              |
+==================
+
+Create triggers which will not allow insert, update and delete operations on following table :  
+RESULT(rno, name, rank)
+
+sqlite3
+.open mydb2.db
+PRAGMA foreign_keys = ON;
+.header on
+.mode box
+
+CREATE TABLE std (
+    rno INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    class TEXT
+);
+
+INSERT INTO std VALUES (1, 'Amit', 'SY');
+INSERT INTO std VALUES (2, 'Bhavya', 'SY');
+INSERT INTO std VALUES (3, 'Chetan', 'SY');
+INSERT INTO std VALUES (4, 'Dhruv', 'SY');
+INSERT INTO std VALUES (5, 'Ekta', 'SY');
+
+CREATE TABLE RESULT (
+    rno INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    rank INTEGER
+);
+
+INSERT INTO RESULT VALUES (1, 'Amit', 2);
+INSERT INTO RESULT VALUES (2, 'Bhavya', 1);
+INSERT INTO RESULT VALUES (3, 'Chetan', 3);
+INSERT INTO RESULT VALUES (4, 'Dhruv', 5);
+INSERT INTO RESULT VALUES (5, 'Ekta', 4)
+
+DROP TRIGGER IF EXISTS t_befor_insert;
+DROP TRIGGER IF EXISTS t_befor_update;
+DROP TRIGGER IF EXISTS t_befor_delete;
+
+CREATE TRIGGER t_befor_insert
+BEFORE INSERT 
+ON RESULT
+BEGIN
+    SELECT RAISE(ABORT, 'INSERT not allowed on RESULT table');
+END;
+
+CREATE TRIGGER t_befor_update
+BEFORE UPDATE 
+ON RESULT
+BEGIN
+    SELECT RAISE(ABORT, 'UPDATE not allowed on RESULT table');
+END;
+
+CREATE TRIGGER t_befor_delete
+BEFORE DELETE 
+ON RESULT
+BEGIN
+    SELECT RAISE(ABORT, 'DELETE not allowed on RESULT table');
+END;
+
+==================
+Q=2              |
+==================
+
+create trigger for EMP(eno, name, salary) table which will not allow to update salary in march 
+month. 
+
+CREATE TABLE EMP (
+    eno INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    salary REAL
+);
+
+INSERT INTO EMP VALUES (1, 'Amit', 30000);
+INSERT INTO EMP VALUES (2, 'Bhavya', 35000);
+INSERT INTO EMP VALUES (3, 'Chetan', 40000);
+
+DROP TRIGGER IF EXISTS t_block_sal;
+
+CREATE TRIGGER t_block_sal
+BEFORE UPDATE 
+ON EMP
+BEGIN
+SELECT 
+CASE
+WHEN strftime('%m', 'now') = '03' THEN
+RAISE(ABORT, 'Salary update not allowed in March')
+END;
+END;
+
+==================
+Q=3              |
+==================
+
+create triggers which will maintain log table ELOG(eno, operation, date_and_time) for insert, 
+update and delete operations perform on EMP(eno, name, salary) table. 
+
+CREATE TABLE EMP (
+    eno INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    salary REAL
+);
+
+CREATE TABLE ELOG (
+    eno INTEGER,
+    operation TEXT,
+    date_and_time TEXT
+);
+
+INSERT INTO EMP VALUES (1, 'Amit', 30000);
+INSERT INTO EMP VALUES (2, 'Bhavya', 35000);
+INSERT INTO EMP VALUES (3, 'Chetan', 40000);
+INSERT INTO EMP VALUES (4, 'Dhruv', 32000);
+INSERT INTO EMP VALUES (5, 'Ekta', 45000);
+
+DROP TRIGGER IF EXISTS log_insert;
+DROP TRIGGER IF EXISTS log_update;
+DROP TRIGGER IF EXISTS log_delete;
+
+
+CREATE TRIGGER log_insert
+AFTER INSERT 
+ON EMP
+BEGIN
+    INSERT INTO ELOG (eno, operation, date_and_time)
+    VALUES (NEW.eno, 'INSERT', datetime('now'));
+END;
+
+
+CREATE TRIGGER log_update
+AFTER UPDATE 
+ON EMP
+BEGIN
+    INSERT INTO ELOG (eno, operation, date_and_time)
+    VALUES (NEW.eno, 'UPDATE', datetime('now'));
+END;
+
+CREATE TRIGGER log_delete
+AFTER DELETE 
+ON EMP
+BEGIN
+    INSERT INTO ELOG (eno, operation, date_and_time)
+    VALUES (OLD.eno, 'DELETE', datetime('now'));
+END;
+
+--now for testing
+
+UPDATE EMP SET salary = 36000 WHERE eno = 2;
+DELETE FROM EMP WHERE eno = 3;
+INSERT INTO EMP VALUES (6, 'Farhan', 39000); 
+
+SELECT * FROM ELOG;
+
+==================
+Q=4              |
+==================
+
+create trigger for ACCOUNT(ano, balance) table to give error message if withdraw amount is 
+more than account balance.
